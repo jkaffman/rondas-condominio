@@ -3,147 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#2563eb">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Rondas Condominio</title>
 <link rel="manifest" href="manifest.json">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --success: #16a34a;
-    --danger: #dc2626;
-    --warning: #d97706;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --text: #1e293b;
-    --muted: #64748b;
-    --border: #e2e8f0;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  .screen { display:none; min-height:100vh; flex-direction:column; }
-  .screen.active { display:flex; }
-  header { background: var(--primary); color: white; padding: 1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-  header h1 { font-size: 1.1rem; font-weight: 600; }
-  header .subtitle { font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
-  .btn-icon { background:none; border:none; color:white; cursor:pointer; padding:4px; font-size:1.3rem; }
-  .content { flex:1; padding: 1.25rem; overflow-y:auto; }
-  .card { background: var(--card); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); }
-  .card-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.75rem; }
-  .btn { width:100%; padding: 0.875rem; border-radius: 10px; border:none; font-size: 1rem; font-weight: 600; cursor:pointer; transition: all 0.2s; }
-  .btn-primary { background: var(--primary); color: white; }
-  .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
-  .btn-success { background: var(--success); color: white; }
-  .btn-danger { background: var(--danger); color: white; }
-  .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .badge { display:inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-  .badge-success { background: #dcfce7; color: #15803d; }
-  .badge-warning { background: #fef9c3; color: #a16207; }
-  .badge-danger { background: #fee2e2; color: #b91c1c; }
-  .badge-info { background: #dbeafe; color: #1d4ed8; }
-  .row { display:flex; justify-content:space-between; align-items:center; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
-  .row:last-child { border-bottom: none; }
-  .row-label { font-size: 0.875rem; color: var(--muted); }
-  .row-value { font-size: 0.875rem; font-weight: 500; }
-  .nfc-area { display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 2.5rem 1rem; text-align:center; }
-  .nfc-ring { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary); display:flex; align-items:center; justify-content:center; margin-bottom: 1.25rem; position:relative; }
-  .nfc-ring.scanning { animation: pulse 1.5s infinite; }
-  .nfc-ring.success { border-color: var(--success); }
-  .nfc-ring.error { border-color: var(--danger); }
-  .nfc-icon { font-size: 3rem; }
-  @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(37,99,235,0.3); } 50%{ box-shadow: 0 0 0 16px rgba(37,99,235,0); } }
-  .nfc-text { font-size: 1rem; color: var(--muted); margin-bottom: 0.5rem; }
-  .nfc-sub { font-size: 0.8rem; color: var(--muted); }
-  .progress-bar { background: var(--border); border-radius: 999px; height: 8px; overflow:hidden; margin: 0.5rem 0; }
-  .progress-fill { height:100%; background: var(--primary); border-radius: 999px; transition: width 0.4s ease; }
-  .point-list { display:flex; flex-direction:column; gap: 0.5rem; }
-  .point-item { display:flex; align-items:center; gap: 0.75rem; padding: 0.75rem; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
-  .point-num { width: 28px; height: 28px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 0.75rem; font-weight: 700; flex-shrink:0; }
-  .point-num.pending { background: var(--border); color: var(--muted); }
-  .point-num.current { background: var(--primary); color: white; }
-  .point-num.done { background: var(--success); color: white; }
-  .point-name { font-size: 0.875rem; flex:1; }
-  .point-time { font-size: 0.75rem; color: var(--muted); }
-  .stat-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .stat-card { background: var(--bg); border-radius: 10px; padding: 1rem; text-align:center; border: 1px solid var(--border); }
-  .stat-val { font-size: 1.75rem; font-weight: 700; color: var(--primary); }
-  .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-  .alert-banner { background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; display:flex; gap: 0.75rem; align-items:flex-start; }
-  .alert-banner.warning { background: #fef9c3; border-color: #fde047; }
-  .alert-icon { font-size: 1.25rem; flex-shrink:0; }
-  .alert-text { font-size: 0.875rem; }
-  .alert-title { font-weight: 600; margin-bottom: 2px; color: #b91c1c; }
-  .alert-banner.warning .alert-title { color: #a16207; }
-  .tab-bar { display:flex; background: var(--card); border-top: 1px solid var(--border); }
-  .tab-btn { flex:1; padding: 0.75rem; border:none; background:none; cursor:pointer; font-size: 0.7rem; color: var(--muted); display:flex; flex-direction:column; align-items:center; gap: 3px; transition: color 0.2s; }
-  .tab-btn.active { color: var(--primary); }
-  .tab-btn .tab-icon { font-size: 1.3rem; }
-  .form-group { margin-bottom: 1rem; }
-  .form-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; display:block; }
-  .form-input { width:100%; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: var(--bg); color: var(--text); }
-  .form-input:focus { outline:none; border-color: var(--primary); }
-  .history-item { padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
-  .history-item:last-child { border-bottom:none; }
-  .history-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px; }
-  .history-ruta { font-size: 0.875rem; font-weight: 600; }
-  .history-time { font-size: 0.75rem; color: var(--muted); }
-  .history-points { font-size: 0.75rem; color: var(--muted); }
-  .toast { position:fixed; bottom: 80px; left: 50%; transform:translateX(-50%); background: #1e293b; color:white; padding: 0.75rem 1.25rem; border-radius: 999px; font-size: 0.875rem; z-index:1000; opacity:0; transition: opacity 0.3s; pointer-events:none; white-space:nowrap; }
-  .toast.show { opacity:1; }
-  .separator { height: 1px; background: var(--border); margin: 0.75rem 0; }
-  #login-screen { background: var(--primary); justify-content:center; align-items:center; padding: 2rem; }
-  .login-logo { font-size: 4rem; margin-bottom: 1rem; text-align:center; }
-  .login-title { color:white; font-size: 1.5rem; font-weight: 700; text-align:center; margin-bottom: 0.5rem; }
-  .login-sub { color: rgba(255,255,255,0.7); font-size: 0.875rem; text-align:center; margin-bottom: 2rem; }
-  .login-card { background:white; border-radius: 16px; padding: 1.5rem; width:100%; max-width: 340px; }
-  .role-selector { display:grid; grid-template-columns:1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
-  .role-btn { padding: 1rem; border-radius: 10px; border: 2px solid var(--border); background:none; cursor:pointer; text-align:center; transition: all 0.2s; }
-  .role-btn.selected { border-color: var(--primary); background: #eff6ff; }
-  .role-btn .role-icon { font-size: 1.75rem; display:block; margin-bottom: 6px; }
-  .role-btn .role-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--primary:#2563eb;--primary-dark:#1d4ed8;--success:#16a34a;--danger:#dc2626;--warning:#d97706;--bg:#f8fafc;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+header{background:var(--primary);color:white;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+header h1{font-size:1.1rem;font-weight:600}
+.btn-icon{background:none;border:none;color:white;cursor:pointer;padding:4px;font-size:1.3rem}
+.content{flex:1;padding:1.25rem;overflow-y:auto}
+.card{background:var(--card);border-radius:12px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid var(--border)}
+.card-title{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.75rem}
+.btn{width:100%;padding:.875rem;border-radius:10px;border:none;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:active{background:var(--primary-dark);transform:scale(.98)}
+.btn-success{background:var(--success);color:white}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+.badge-success{background:#dcfce7;color:#15803d}
+.badge-warning{background:#fef9c3;color:#a16207}
+.badge-danger{background:#fee2e2;color:#b91c1c}
+.row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row-label{font-size:.875rem;color:var(--muted)}
+.row-value{font-size:.875rem;font-weight:500}
+.nfc-area{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;text-align:center}
+.nfc-ring{width:120px;height:120px;border-radius:50%;border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem}
+.nfc-ring.scanning{animation:pulse 1.5s infinite}
+.nfc-ring.success{border-color:var(--success)}
+.nfc-ring.error{border-color:var(--danger)}
+.nfc-icon{font-size:3rem}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.3)}50%{box-shadow:0 0 0 16px rgba(37,99,235,0)}}
+.nfc-text{font-size:1rem;color:var(--muted);margin-bottom:.5rem}
+.nfc-sub{font-size:.8rem;color:var(--muted)}
+.progress-bar{background:var(--border);border-radius:999px;height:8px;overflow:hidden;margin:.5rem 0}
+.progress-fill{height:100%;background:var(--primary);border-radius:999px;transition:width .4s ease}
+.point-list{display:flex;flex-direction:column;gap:.5rem}
+.point-item{display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:8px;background:var(--bg);border:1px solid var(--border)}
+.point-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.point-num.pending{background:var(--border);color:var(--muted)}
+.point-num.current{background:var(--primary);color:white}
+.point-num.done{background:var(--success);color:white}
+.point-name{font-size:.875rem;flex:1}
+.point-time{font-size:.75rem;color:var(--muted)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.stat-card{background:var(--bg);border-radius:10px;padding:1rem;text-align:center;border:1px solid var(--border)}
+.stat-val{font-size:1.75rem;font-weight:700;color:var(--primary)}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:2px}
+.alert-banner{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:1rem;margin-bottom:1rem;display:flex;gap:.75rem;align-items:flex-start}
+.alert-icon{font-size:1.25rem;flex-shrink:0}
+.alert-text{font-size:.875rem}
+.alert-title{font-weight:600;margin-bottom:2px;color:#b91c1c}
+.tab-bar{display:flex;background:var(--card);border-top:1px solid var(--border)}
+.tab-btn{flex:1;padding:.75rem;border:none;background:none;cursor:pointer;font-size:.7rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s}
+.tab-btn.active{color:var(--primary)}
+.tab-btn .tab-icon{font-size:1.3rem}
+.form-group{margin-bottom:1rem}
+.form-label{font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;display:block}
+.form-input{width:100%;padding:.75rem;border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;background:var(--bg);color:var(--text)}
+.form-input:focus{outline:none;border-color:var(--primary)}
+.history-item{padding:.75rem 0;border-bottom:1px solid var(--border)}
+.history-item:last-child{border-bottom:none}
+.history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.history-ruta{font-size:.875rem;font-weight:600}
+.history-time{font-size:.75rem;color:var(--muted)}
+.history-points{font-size:.75rem;color:var(--muted)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:.75rem 1.25rem;border-radius:999px;font-size:.875rem;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+#login-screen{background:var(--primary);justify-content:center;align-items:center;padding:2rem}
+.login-logo{font-size:4rem;margin-bottom:1rem;text-align:center}
+.login-title{color:white;font-size:1.5rem;font-weight:700;text-align:center;margin-bottom:.5rem}
+.login-sub{color:rgba(255,255,255,.7);font-size:.875rem;text-align:center;margin-bottom:2rem}
+.login-card{background:white;border-radius:16px;padding:1.5rem;width:100%;max-width:340px}
+.role-selector{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
+.role-btn{padding:1rem;border-radius:10px;border:2px solid var(--border);background:none;cursor:pointer;text-align:center;transition:all .2s}
+.role-btn.selected{border-color:var(--primary);background:#eff6ff}
+.role-btn .role-icon{font-size:1.75rem;display:block;margin-bottom:6px}
+.role-btn .role-name{font-size:.8rem;font-weight:600;color:var(--text)}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen" class="screen active">
   <div class="login-logo">🏢</div>
   <div class="login-title">Rondas Condominio</div>
   <div class="login-sub">Sistema de control de rondas</div>
   <div class="login-card">
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;font-weight:600;">INGRESAR COMO</p>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem;font-weight:600;">INGRESAR COMO</p>
     <div class="role-selector">
       <button class="role-btn selected" onclick="selectRole('guardia')" id="btn-guardia">
-        <span class="role-icon">👮</span>
-        <span class="role-name">Guardia</span>
+        <span class="role-icon">👮</span><span class="role-name">Guardia</span>
       </button>
       <button class="role-btn" onclick="selectRole('admin')" id="btn-admin">
-        <span class="role-icon">👤</span>
-        <span class="role-name">Administrador</span>
+        <span class="role-icon">👤</span><span class="role-name">Administrador</span>
       </button>
     </div>
     <button class="btn btn-primary" onclick="doLogin()">Ingresar</button>
   </div>
 </div>
 
-<!-- GUARDIA: INICIO RONDA -->
 <div id="guardia-home" class="screen">
   <header>
-    <div>
-      <div style="font-size:0.75rem;opacity:0.8;">Vista Guardia</div>
-      <h1>Control de Rondas</h1>
-    </div>
-    <button class="btn-icon" onclick="logout()" title="Salir">⏻</button>
+    <div><div style="font-size:.75rem;opacity:.8">Vista Guardia</div><h1>Control de Rondas</h1></div>
+    <button class="btn-icon" onclick="logout()">⏻</button>
   </header>
   <div class="content">
-    <div id="alerta-banner" style="display:none;"></div>
+    <div id="alerta-banner"></div>
     <div class="card">
       <div class="card-title">Estado actual</div>
-      <div class="row"><span class="row-label">Última ronda</span><span class="row-value" id="ultima-ronda">Cargando...</span></div>
+      <div class="row"><span class="row-label">Última ronda</span><span class="row-value" id="ultima-ronda">—</span></div>
       <div class="row"><span class="row-label">Próxima ronda</span><span class="row-value" id="proxima-ronda">—</span></div>
       <div class="row"><span class="row-label">Frecuencia</span><span class="row-value" id="frecuencia-display">—</span></div>
     </div>
@@ -151,45 +126,35 @@
       <div class="card-title">Rondas de hoy</div>
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-val" id="rondas-ok">0</div><div class="stat-label">Completadas</div></div>
-        <div class="stat-card"><div class="stat-val" id="rondas-pendientes" style="color:var(--warning);">0</div><div class="stat-label">Pendientes</div></div>
+        <div class="stat-card"><div class="stat-val" id="rondas-pendientes" style="color:var(--warning)">0</div><div class="stat-label">Pendientes</div></div>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="iniciarRonda()" id="btn-iniciar">
-      Iniciar nueva ronda
-    </button>
+    <button class="btn btn-primary" onclick="iniciarRonda()" id="btn-iniciar">Iniciar nueva ronda</button>
   </div>
 </div>
 
-<!-- GUARDIA: RONDA ACTIVA -->
 <div id="guardia-ronda" class="screen">
   <header>
-    <div>
-      <div style="font-size:0.75rem;opacity:0.8;" id="ronda-ruta-label">Cargando ruta...</div>
-      <h1>Ronda en curso</h1>
-    </div>
-    <button class="btn-icon" onclick="cancelarRonda()" title="Cancelar">✕</button>
+    <div><div style="font-size:.75rem;opacity:.8" id="ronda-ruta-label">—</div><h1>Ronda en curso</h1></div>
+    <button class="btn-icon" onclick="cancelarRonda()">✕</button>
   </header>
   <div class="content">
     <div class="card">
       <div class="card-title">Progreso</div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;">
-        <span style="font-size:0.875rem;"><span id="puntos-hechos">0</span> de <span id="puntos-total">0</span> puntos</span>
-        <span style="font-size:0.875rem;font-weight:600;" id="pct-progreso">0%</span>
+      <div style="display:flex;justify-content:space-between;margin-bottom:.4rem">
+        <span style="font-size:.875rem"><span id="puntos-hechos">0</span> de <span id="puntos-total">0</span> puntos</span>
+        <span style="font-size:.875rem;font-weight:600" id="pct-progreso">0%</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="barra-progreso" style="width:0%"></div></div>
     </div>
     <div class="card">
       <div class="card-title">Siguiente punto</div>
       <div class="nfc-area">
-        <div class="nfc-ring scanning" id="nfc-ring">
-          <span class="nfc-icon" id="nfc-icon">📡</span>
-        </div>
+        <div class="nfc-ring scanning" id="nfc-ring"><span class="nfc-icon" id="nfc-icon">📡</span></div>
         <div class="nfc-text" id="nfc-instruccion">Acerca el celular al tag NFC</div>
-        <div class="nfc-sub" id="nfc-punto-actual">Punto: <strong id="nombre-punto-actual">—</strong></div>
+        <div class="nfc-sub">Punto: <strong id="nombre-punto-actual">—</strong></div>
       </div>
-      <button class="btn btn-outline" onclick="simularLectura()" id="btn-simular" style="margin-top:0.5rem;">
-        📷 Registrar con foto (si NFC falla)
-      </button>
+      <button class="btn btn-outline" onclick="registrarManual()" id="btn-manual" style="margin-top:.5rem">📷 Registrar manualmente (si NFC falla)</button>
     </div>
     <div class="card">
       <div class="card-title">Recorrido</div>
@@ -198,37 +163,24 @@
   </div>
 </div>
 
-<!-- ADMIN: TABS -->
 <div id="admin-screen" class="screen">
   <header>
-    <div>
-      <div style="font-size:0.75rem;opacity:0.8;">Vista Administrador</div>
-      <h1 id="admin-tab-title">Panel de control</h1>
-    </div>
-    <button class="btn-icon" onclick="logout()" title="Salir">⏻</button>
+    <div><div style="font-size:.75rem;opacity:.8">Administrador</div><h1 id="admin-tab-title">Panel de control</h1></div>
+    <button class="btn-icon" onclick="logout()">⏻</button>
   </header>
-  <div class="content" id="admin-content">
-    <!-- contenido dinámico -->
-  </div>
+  <div class="content" id="admin-content"></div>
   <nav class="tab-bar">
-    <button class="tab-btn active" onclick="adminTab('panel')" id="tab-panel">
-      <span class="tab-icon">📊</span>Panel
-    </button>
-    <button class="tab-btn" onclick="adminTab('historial')" id="tab-historial">
-      <span class="tab-icon">📋</span>Historial
-    </button>
-    <button class="tab-btn" onclick="adminTab('config')" id="tab-config">
-      <span class="tab-icon">⚙️</span>Config
-    </button>
+    <button class="tab-btn active" onclick="adminTab('panel')" id="tab-panel"><span class="tab-icon">📊</span>Panel</button>
+    <button class="tab-btn" onclick="adminTab('historial')" id="tab-historial"><span class="tab-icon">📋</span>Historial</button>
+    <button class="tab-btn" onclick="adminTab('config')" id="tab-config"><span class="tab-icon">⚙️</span>Config</button>
   </nav>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, addDoc, getDoc, getDocs, setDoc, query, orderBy, limit, where, Timestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, addDoc, getDoc, getDocs, setDoc, query, orderBy, limit, where, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3ARs7KIsjK28JOiu8jijFy7j6daLLNV4",
@@ -242,7 +194,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Estado global
 let state = {
   role: 'guardia',
   rutaActual: null,
@@ -251,14 +202,13 @@ let state = {
   rondaId: null,
   registrosRonda: [],
   config: { frecuencia_horas: 2, tolerancia_minutos: 30, alerta_email: '' },
-  nfcController: null,
-  adminTab: 'panel'
+  nfcController: null
 };
 
-window.selectRole = (role) => {
-  state.role = role;
-  document.getElementById('btn-guardia').classList.toggle('selected', role === 'guardia');
-  document.getElementById('btn-admin').classList.toggle('selected', role === 'admin');
+window.selectRole = (r) => {
+  state.role = r;
+  document.getElementById('btn-guardia').classList.toggle('selected', r==='guardia');
+  document.getElementById('btn-admin').classList.toggle('selected', r==='admin');
 };
 
 window.doLogin = async () => {
@@ -274,7 +224,7 @@ window.doLogin = async () => {
 };
 
 window.logout = () => {
-  if (state.nfcController) { try { state.nfcController.abort(); } catch(e){} }
+  if (state.nfcController) try { state.nfcController.abort(); } catch(e){}
   showScreen('login-screen');
 };
 
@@ -290,72 +240,86 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+function formatTime(d) { return d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}); }
+function formatDT(d) { return d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})+' '+formatTime(d); }
+
 async function cargarConfig() {
   try {
-    const snap = await getDoc(doc(db, 'configuracion', 'parametros'));
-    if (snap.exists()) state.config = { ...state.config, ...snap.data() };
-  } catch(e) { console.log('Config error:', e); }
+    const snap = await getDoc(doc(db,'configuracion','parametros'));
+    if (snap.exists()) state.config = {...state.config,...snap.data()};
+  } catch(e) { console.log('Config error:',e); }
 }
 
 async function actualizarHomeGuardia() {
   try {
+    // Consulta simple sin orderBy para evitar índice compuesto
+    const snap = await getDocs(collection(db,'registros'));
     const hoy = new Date(); hoy.setHours(0,0,0,0);
-    const q = query(collection(db, 'registros'), where('tipo', '==', 'ronda_completa'), orderBy('timestamp', 'desc'), limit(20));
-    const snap = await getDocs(q);
-    const rondasHoy = snap.docs.filter(d => d.data().timestamp?.toDate() >= hoy);
-    document.getElementById('rondas-ok').textContent = rondasHoy.length;
+    const rondasHoy = snap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(d => d.tipo === 'ronda_completa' && d.timestamp?.toDate() >= hoy)
+      .sort((a,b) => b.timestamp.toDate() - a.timestamp.toDate());
+
     const frecH = state.config.frecuencia_horas || 2;
-    const horasDisponibles = 24;
-    const rondasEsperadas = Math.floor(horasDisponibles / frecH);
-    const pendientes = Math.max(0, rondasEsperadas - rondasHoy.length);
-    document.getElementById('rondas-pendientes').textContent = pendientes;
+    const ahora = new Date();
+    const horasTranscurridas = ahora.getHours() + ahora.getMinutes()/60;
+    const esperadas = Math.max(1, Math.floor(horasTranscurridas / frecH));
+
+    document.getElementById('rondas-ok').textContent = rondasHoy.length;
+    document.getElementById('rondas-pendientes').textContent = Math.max(0, esperadas - rondasHoy.length);
     document.getElementById('frecuencia-display').textContent = `Cada ${frecH} hora${frecH>1?'s':''}`;
+
     if (rondasHoy.length > 0) {
-      const ultima = rondasHoy[0].data().timestamp?.toDate();
-      document.getElementById('ultima-ronda').textContent = ultima ? formatTime(ultima) : '—';
+      const ultima = rondasHoy[0].timestamp.toDate();
       const proxima = new Date(ultima.getTime() + frecH * 3600000);
+      document.getElementById('ultima-ronda').textContent = formatTime(ultima);
       document.getElementById('proxima-ronda').textContent = formatTime(proxima);
-      const ahora = new Date();
-      const tolMs = (state.config.tolerancia_minutos || 30) * 60000;
+      const tolMs = (state.config.tolerancia_minutos||30)*60000;
       if (ahora > new Date(proxima.getTime() + tolMs)) {
-        document.getElementById('alerta-banner').style.display = 'block';
-        document.getElementById('alerta-banner').innerHTML = `<div class="alert-banner"><span class="alert-icon">⚠️</span><div class="alert-text"><div class="alert-title">Ronda atrasada</div>La ronda debió realizarse a las ${formatTime(proxima)}</div></div>`;
+        document.getElementById('alerta-banner').innerHTML = `<div class="alert-banner"><span class="alert-icon">⚠️</span><div class="alert-text"><div class="alert-title">Ronda atrasada</div>Debió realizarse a las ${formatTime(proxima)}</div></div>`;
       } else {
-        document.getElementById('alerta-banner').style.display = 'none';
+        document.getElementById('alerta-banner').innerHTML = '';
       }
     } else {
       document.getElementById('ultima-ronda').textContent = 'Sin rondas hoy';
       document.getElementById('proxima-ronda').textContent = 'Pendiente';
+      document.getElementById('alerta-banner').innerHTML = '';
     }
-  } catch(e) { console.log('Error home:', e); }
-}
-
-function formatTime(date) {
-  return date.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
-}
-
-function formatDateTime(date) {
-  return date.toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit' }) + ' ' + formatTime(date);
+  } catch(e) { console.log('Error home:',e); }
 }
 
 async function elegirRutaAleatoria() {
-  const snap = await getDocs(query(collection(db, 'rutas'), where('activo', '==', true)));
-  const rutas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  if (rutas.length === 0) return null;
-  return rutas[Math.floor(Math.random() * rutas.length)];
+  try {
+    // Consulta simple sin where para evitar índice
+    const snap = await getDocs(collection(db,'rutas'));
+    const rutas = snap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(r => r.activo === true);
+    if (rutas.length === 0) return null;
+    return rutas[Math.floor(Math.random() * rutas.length)];
+  } catch(e) {
+    console.log('Error rutas:',e);
+    return null;
+  }
 }
 
 window.iniciarRonda = async () => {
-  document.getElementById('btn-iniciar').disabled = true;
-  document.getElementById('btn-iniciar').textContent = 'Preparando...';
+  const btn = document.getElementById('btn-iniciar');
+  btn.disabled = true;
+  btn.textContent = 'Preparando...';
   try {
     const ruta = await elegirRutaAleatoria();
-    if (!ruta) { showToast('No hay rutas configuradas'); return; }
+    if (!ruta) {
+      showToast('No se encontraron rutas activas');
+      btn.disabled = false;
+      btn.textContent = 'Iniciar nueva ronda';
+      return;
+    }
     state.rutaActual = ruta;
     state.puntosRuta = ruta.puntos || [];
     state.puntoActualIdx = 0;
     state.registrosRonda = [];
-    const rondaRef = await addDoc(collection(db, 'registros'), {
+    const ref = await addDoc(collection(db,'registros'), {
       tipo: 'ronda_inicio',
       ruta: ruta.nombre,
       ruta_id: ruta.id,
@@ -363,47 +327,49 @@ window.iniciarRonda = async () => {
       puntos_total: state.puntosRuta.length,
       puntos_completados: 0
     });
-    state.rondaId = rondaRef.id;
+    state.rondaId = ref.id;
     showScreen('guardia-ronda');
     document.getElementById('ronda-ruta-label').textContent = `Ruta asignada: ${ruta.nombre}`;
     actualizarVistaRonda();
   } catch(e) {
-    showToast('Error al iniciar ronda');
-    console.log(e);
+    console.log('Error iniciar ronda:',e);
+    showToast('Error al iniciar. Intenta de nuevo.');
   }
-  document.getElementById('btn-iniciar').disabled = false;
-  document.getElementById('btn-iniciar').textContent = 'Iniciar nueva ronda';
+  btn.disabled = false;
+  btn.textContent = 'Iniciar nueva ronda';
 };
 
 function actualizarVistaRonda() {
   const total = state.puntosRuta.length;
   const hechos = state.puntoActualIdx;
-  const pct = total > 0 ? Math.round((hechos / total) * 100) : 0;
+  const pct = total > 0 ? Math.round((hechos/total)*100) : 0;
   document.getElementById('puntos-hechos').textContent = hechos;
   document.getElementById('puntos-total').textContent = total;
-  document.getElementById('pct-progreso').textContent = pct + '%';
-  document.getElementById('barra-progreso').style.width = pct + '%';
+  document.getElementById('pct-progreso').textContent = pct+'%';
+  document.getElementById('barra-progreso').style.width = pct+'%';
+
   if (hechos < total) {
-    const puntoActual = state.puntosRuta[hechos];
-    document.getElementById('nombre-punto-actual').textContent = puntoActual;
+    const pa = state.puntosRuta[hechos];
+    document.getElementById('nombre-punto-actual').textContent = pa;
     document.getElementById('nfc-instruccion').textContent = 'Acerca el celular al tag NFC';
     document.getElementById('nfc-ring').className = 'nfc-ring scanning';
     document.getElementById('nfc-icon').textContent = '📡';
-    document.getElementById('btn-simular').style.display = 'block';
+    document.getElementById('btn-manual').style.display = 'block';
   } else {
     document.getElementById('nombre-punto-actual').textContent = '¡Completado!';
     document.getElementById('nfc-instruccion').textContent = 'Ronda finalizada';
     document.getElementById('nfc-ring').className = 'nfc-ring success';
     document.getElementById('nfc-icon').textContent = '✅';
-    document.getElementById('btn-simular').style.display = 'none';
+    document.getElementById('btn-manual').style.display = 'none';
     setTimeout(finalizarRonda, 1500);
   }
+
   const lista = document.getElementById('lista-puntos-ronda');
-  lista.innerHTML = state.puntosRuta.map((p, i) => {
-    let cls = 'pending', icon = i + 1;
-    if (i < hechos) { cls = 'done'; icon = '✓'; }
-    else if (i === hechos) { cls = 'current'; }
-    const reg = state.registrosRonda.find(r => r.punto === p);
+  lista.innerHTML = state.puntosRuta.map((p,i) => {
+    let cls = 'pending', icon = i+1;
+    if (i < hechos) { cls='done'; icon='✓'; }
+    else if (i === hechos) cls='current';
+    const reg = state.registrosRonda.find(r => r.punto===p);
     const hora = reg ? `<span class="point-time">${formatTime(new Date(reg.ts))}</span>` : '';
     return `<div class="point-item"><div class="point-num ${cls}">${icon}</div><span class="point-name">${p}</span>${hora}</div>`;
   }).join('');
@@ -411,7 +377,7 @@ function actualizarVistaRonda() {
 
 async function registrarPunto(tagId, metodo) {
   const puntoEsperado = state.puntosRuta[state.puntoActualIdx];
-  if (tagId !== puntoEsperado && metodo === 'nfc') {
+  if (metodo === 'nfc' && tagId !== puntoEsperado) {
     showToast(`Tag incorrecto. Se espera: ${puntoEsperado}`);
     document.getElementById('nfc-ring').className = 'nfc-ring error';
     document.getElementById('nfc-icon').textContent = '❌';
@@ -424,16 +390,18 @@ async function registrarPunto(tagId, metodo) {
   document.getElementById('nfc-ring').className = 'nfc-ring success';
   document.getElementById('nfc-icon').textContent = '✅';
   const ahora = new Date();
-  state.registrosRonda.push({ punto: puntoEsperado, ts: ahora.getTime(), metodo });
-  await addDoc(collection(db, 'registros'), {
-    tipo: 'punto_escaneado',
-    ronda_id: state.rondaId,
-    punto: puntoEsperado,
-    tag_id: tagId,
-    metodo,
-    ruta: state.rutaActual.nombre,
-    timestamp: Timestamp.now()
-  });
+  state.registrosRonda.push({punto:puntoEsperado, ts:ahora.getTime(), metodo});
+  try {
+    await addDoc(collection(db,'registros'), {
+      tipo: 'punto_escaneado',
+      ronda_id: state.rondaId,
+      punto: puntoEsperado,
+      tag_id: tagId,
+      metodo,
+      ruta: state.rutaActual.nombre,
+      timestamp: Timestamp.now()
+    });
+  } catch(e) { console.log('Error registrar punto:',e); }
   showToast(`✓ ${puntoEsperado} registrado`);
   state.puntoActualIdx++;
   setTimeout(actualizarVistaRonda, 800);
@@ -441,7 +409,7 @@ async function registrarPunto(tagId, metodo) {
 
 async function finalizarRonda() {
   try {
-    await setDoc(doc(db, 'registros', state.rondaId), {
+    await setDoc(doc(db,'registros',state.rondaId), {
       tipo: 'ronda_completa',
       ruta: state.rutaActual.nombre,
       ruta_id: state.rutaActual.id,
@@ -462,118 +430,103 @@ window.cancelarRonda = () => {
   }
 };
 
-window.simularLectura = () => {
-  const puntoActual = state.puntosRuta[state.puntoActualIdx];
-  registrarPunto(puntoActual, 'manual');
+window.registrarManual = () => {
+  registrarPunto(state.puntosRuta[state.puntoActualIdx], 'manual');
 };
 
-// NFC
 function iniciarNFC() {
-  if (!('NDEFReader' in window)) { console.log('NFC no disponible'); return; }
+  if (!('NDEFReader' in window)) return;
   const controller = new AbortController();
   state.nfcController = controller;
   const reader = new NDEFReader();
-  reader.scan({ signal: controller.signal }).then(() => {
+  reader.scan({signal: controller.signal}).then(() => {
     reader.onreading = (event) => {
-      const tagId = event.serialNumber?.replace(/:/g,'').toUpperCase() || 'TAG_' + Date.now();
-      if (document.getElementById('guardia-ronda').classList.contains('active')) {
-        registrarPunto(tagId, 'nfc');
-      }
+      if (!document.getElementById('guardia-ronda').classList.contains('active')) return;
+      const tagId = event.serialNumber?.replace(/:/g,'').toUpperCase() || 'TAG_'+Date.now();
+      registrarPunto(tagId, 'nfc');
     };
-  }).catch(e => console.log('NFC scan error:', e));
+  }).catch(e => console.log('NFC:',e));
 }
 
-// ADMIN TABS
 window.adminTab = async (tab) => {
-  state.adminTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  const titles = { panel: 'Panel de control', historial: 'Historial de rondas', config: 'Configuración' };
+  document.getElementById('tab-'+tab).classList.add('active');
+  const titles = {panel:'Panel de control', historial:'Historial de rondas', config:'Configuración'};
   document.getElementById('admin-tab-title').textContent = titles[tab];
-  const content = document.getElementById('admin-content');
-  if (tab === 'panel') await renderAdminPanel(content);
-  else if (tab === 'historial') await renderHistorial(content);
-  else if (tab === 'config') await renderConfig(content);
+  const el = document.getElementById('admin-content');
+  if (tab==='panel') await renderPanel(el);
+  else if (tab==='historial') await renderHistorial(el);
+  else await renderConfig(el);
 };
 
-async function renderAdminPanel(el) {
+async function getRondas(soloHoy=false) {
+  const snap = await getDocs(collection(db,'registros'));
+  const todas = snap.docs.map(d => ({id:d.id,...d.data()}));
+  const completas = todas.filter(d => d.tipo==='ronda_completa')
+    .sort((a,b) => b.timestamp.toDate() - a.timestamp.toDate());
+  if (!soloHoy) return completas;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  return completas.filter(d => d.timestamp.toDate() >= hoy);
+}
+
+async function renderPanel(el) {
   el.innerHTML = '<div class="card"><div class="card-title">Cargando...</div></div>';
   try {
     await cargarConfig();
-    const hoy = new Date(); hoy.setHours(0,0,0,0);
-    const q = query(collection(db, 'registros'), where('tipo', '==', 'ronda_completa'), orderBy('timestamp', 'desc'), limit(50));
-    const snap = await getDocs(q);
-    const todas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const rondasHoy = todas.filter(d => d.timestamp?.toDate() >= hoy);
+    const rondasHoy = await getRondas(true);
     const frecH = state.config.frecuencia_horas || 2;
     const ahora = new Date();
     const horasTranscurridas = ahora.getHours() + ahora.getMinutes()/60;
-    const esperadasHoy = Math.max(1, Math.floor(horasTranscurridas / frecH));
+    const esperadas = Math.max(1, Math.floor(horasTranscurridas/frecH));
     const ultima = rondasHoy[0];
-    const ultimaFecha = ultima ? ultima.timestamp?.toDate() : null;
-    const proxima = ultimaFecha ? new Date(ultimaFecha.getTime() + frecH * 3600000) : null;
-    const atrasada = proxima && ahora > new Date(proxima.getTime() + (state.config.tolerancia_minutos||30)*60000);
-    let alertaHTML = '';
-    if (atrasada) {
-      alertaHTML = `<div class="alert-banner"><span class="alert-icon">🚨</span><div class="alert-text"><div class="alert-title">Ronda atrasada</div>Debió realizarse a las ${formatTime(proxima)}</div></div>`;
-    }
+    const ultimaFecha = ultima?.timestamp?.toDate();
+    const proxima = ultimaFecha ? new Date(ultimaFecha.getTime()+frecH*3600000) : null;
+    const atrasada = proxima && ahora > new Date(proxima.getTime()+(state.config.tolerancia_minutos||30)*60000);
+
     el.innerHTML = `
-      ${alertaHTML}
+      ${atrasada ? `<div class="alert-banner"><span class="alert-icon">🚨</span><div class="alert-text"><div class="alert-title">Ronda atrasada</div>Debió realizarse a las ${formatTime(proxima)}</div></div>` : ''}
       <div class="card">
         <div class="card-title">Resumen de hoy</div>
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-val" style="color:var(--success)">${rondasHoy.length}</div><div class="stat-label">Rondas hechas</div></div>
-          <div class="stat-card"><div class="stat-val" style="color:${atrasada?'var(--danger)':'var(--warning)'}">${Math.max(0,esperadasHoy-rondasHoy.length)}</div><div class="stat-label">Pendientes</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:${atrasada?'var(--danger)':'var(--warning)'}">${Math.max(0,esperadas-rondasHoy.length)}</div><div class="stat-label">Pendientes</div></div>
         </div>
       </div>
       <div class="card">
         <div class="card-title">Estado actual</div>
-        <div class="row"><span class="row-label">Última ronda</span><span class="row-value">${ultimaFecha ? formatDateTime(ultimaFecha) : 'Sin rondas hoy'}</span></div>
+        <div class="row"><span class="row-label">Última ronda</span><span class="row-value">${ultimaFecha ? formatDT(ultimaFecha) : 'Sin rondas hoy'}</span></div>
         <div class="row"><span class="row-label">Próxima ronda</span><span class="row-value">${proxima ? formatTime(proxima) : '—'}</span></div>
         <div class="row"><span class="row-label">Frecuencia</span><span class="row-value">Cada ${frecH}h</span></div>
         <div class="row"><span class="row-label">Tolerancia</span><span class="row-value">${state.config.tolerancia_minutos||30} min</span></div>
       </div>
       <div class="card">
-        <div class="card-title">Últimas rondas</div>
-        ${rondasHoy.slice(0,5).map(r => `
-          <div class="history-item">
-            <div class="history-header">
-              <span class="history-ruta">${r.ruta || '—'}</span>
-              <span class="badge badge-success">Completa</span>
-            </div>
-            <div class="history-time">${formatDateTime(r.timestamp?.toDate())}</div>
-            <div class="history-points">${r.puntos_completados || 0} de ${r.puntos_total || 0} puntos</div>
-          </div>
-        `).join('') || '<div style="color:var(--muted);font-size:0.875rem;padding:0.5rem 0;">Sin rondas hoy</div>'}
+        <div class="card-title">Últimas rondas hoy</div>
+        ${rondasHoy.length===0 ? '<p style="color:var(--muted);font-size:.875rem">Sin rondas hoy</p>' :
+          rondasHoy.slice(0,5).map(r=>`
+            <div class="history-item">
+              <div class="history-header"><span class="history-ruta">${r.ruta||'—'}</span><span class="badge badge-success">Completa</span></div>
+              <div class="history-time">${formatDT(r.timestamp.toDate())}</div>
+              <div class="history-points">${r.puntos_completados||0} de ${r.puntos_total||0} puntos</div>
+            </div>`).join('')}
       </div>
-      <button class="btn btn-outline" onclick="adminTab('panel')" style="margin-top:0.5rem;">🔄 Actualizar</button>
-    `;
-  } catch(e) { el.innerHTML = '<div class="card"><p>Error al cargar datos</p></div>'; console.log(e); }
+      <button class="btn btn-outline" onclick="adminTab('panel')">🔄 Actualizar</button>`;
+  } catch(e) { el.innerHTML='<div class="card"><p>Error al cargar</p></div>'; console.log(e); }
 }
 
 async function renderHistorial(el) {
-  el.innerHTML = '<div class="card"><div class="card-title">Cargando historial...</div></div>';
+  el.innerHTML = '<div class="card"><div class="card-title">Cargando...</div></div>';
   try {
-    const q = query(collection(db, 'registros'), where('tipo', '==', 'ronda_completa'), orderBy('timestamp', 'desc'), limit(30));
-    const snap = await getDocs(q);
-    const rondas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    el.innerHTML = `
-      <div class="card">
-        <div class="card-title">Últimas 30 rondas</div>
-        ${rondas.length === 0 ? '<p style="color:var(--muted);font-size:0.875rem;">Sin registros aún</p>' :
-          rondas.map(r => `
-            <div class="history-item">
-              <div class="history-header">
-                <span class="history-ruta">${r.ruta || '—'}</span>
-                <span class="badge badge-success">Completa</span>
-              </div>
-              <div class="history-time">${formatDateTime(r.timestamp?.toDate())}</div>
-              <div class="history-points">${r.puntos_completados || 0}/${r.puntos_total || 0} puntos</div>
-            </div>
-          `).join('')}
-      </div>
-    `;
-  } catch(e) { el.innerHTML = '<div class="card"><p>Error al cargar historial</p></div>'; }
+    const rondas = await getRondas(false);
+    el.innerHTML = `<div class="card"><div class="card-title">Últimas rondas</div>
+      ${rondas.length===0 ? '<p style="color:var(--muted);font-size:.875rem">Sin registros aún</p>' :
+        rondas.slice(0,30).map(r=>`
+          <div class="history-item">
+            <div class="history-header"><span class="history-ruta">${r.ruta||'—'}</span><span class="badge badge-success">Completa</span></div>
+            <div class="history-time">${formatDT(r.timestamp.toDate())}</div>
+            <div class="history-points">${r.puntos_completados||0}/${r.puntos_total||0} puntos</div>
+          </div>`).join('')}
+    </div>`;
+  } catch(e) { el.innerHTML='<div class="card"><p>Error</p></div>'; }
 }
 
 async function renderConfig(el) {
@@ -582,48 +535,38 @@ async function renderConfig(el) {
   el.innerHTML = `
     <div class="card">
       <div class="card-title">Parámetros de ronda</div>
-      <div class="form-group">
-        <label class="form-label">Frecuencia de rondas (horas)</label>
-        <input class="form-input" type="number" id="cfg-frecuencia" value="${c.frecuencia_horas || 2}" min="1" max="12">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tolerancia antes de alerta (minutos)</label>
-        <input class="form-input" type="number" id="cfg-tolerancia" value="${c.tolerancia_minutos || 30}" min="5" max="120">
-      </div>
+      <div class="form-group"><label class="form-label">Frecuencia de rondas (horas)</label>
+        <input class="form-input" type="number" id="cfg-frecuencia" value="${c.frecuencia_horas||2}" min="1" max="24"></div>
+      <div class="form-group"><label class="form-label">Tolerancia antes de alerta (minutos)</label>
+        <input class="form-input" type="number" id="cfg-tolerancia" value="${c.tolerancia_minutos||30}" min="5" max="120"></div>
     </div>
     <div class="card">
-      <div class="card-title">Alertas</div>
-      <div class="form-group">
-        <label class="form-label">Email de alerta principal</label>
-        <input class="form-input" type="email" id="cfg-email" value="${c.alerta_email || ''}" placeholder="admin@condominio.cl">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email de alerta secundario (opcional)</label>
-        <input class="form-input" type="email" id="cfg-email2" value="${c.alerta_email2 || ''}" placeholder="comite@condominio.cl">
-      </div>
+      <div class="card-title">Alertas por email</div>
+      <div class="form-group"><label class="form-label">Email principal</label>
+        <input class="form-input" type="email" id="cfg-email" value="${c.alerta_email||''}" placeholder="admin@condominio.cl"></div>
+      <div class="form-group"><label class="form-label">Email secundario (opcional)</label>
+        <input class="form-input" type="email" id="cfg-email2" value="${c.alerta_email2||''}" placeholder="comite@condominio.cl"></div>
     </div>
     <button class="btn btn-primary" onclick="guardarConfig()">Guardar cambios</button>
-    <div id="config-msg" style="margin-top:0.75rem;text-align:center;font-size:0.875rem;color:var(--success);display:none;">✓ Configuración guardada</div>
-  `;
+    <div id="config-msg" style="margin-top:.75rem;text-align:center;font-size:.875rem;color:var(--success);display:none">✓ Configuración guardada</div>`;
 }
 
 window.guardarConfig = async () => {
   try {
-    const nuevaConfig = {
-      frecuencia_horas: parseInt(document.getElementById('cfg-frecuencia').value) || 2,
-      tolerancia_minutos: parseInt(document.getElementById('cfg-tolerancia').value) || 30,
+    const cfg = {
+      frecuencia_horas: parseInt(document.getElementById('cfg-frecuencia').value)||2,
+      tolerancia_minutos: parseInt(document.getElementById('cfg-tolerancia').value)||30,
       alerta_email: document.getElementById('cfg-email').value,
       alerta_email2: document.getElementById('cfg-email2').value,
       activo: true
     };
-    await setDoc(doc(db, 'configuracion', 'parametros'), nuevaConfig);
-    state.config = nuevaConfig;
-    document.getElementById('config-msg').style.display = 'block';
-    setTimeout(() => document.getElementById('config-msg').style.display = 'none', 3000);
+    await setDoc(doc(db,'configuracion','parametros'), cfg);
+    state.config = cfg;
+    document.getElementById('config-msg').style.display='block';
+    setTimeout(()=>document.getElementById('config-msg').style.display='none', 3000);
     showToast('Configuración guardada');
-  } catch(e) { showToast('Error al guardar'); console.log(e); }
+  } catch(e) { showToast('Error al guardar'); }
 };
-
 </script>
 </body>
 </html>
