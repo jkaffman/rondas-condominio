@@ -365,7 +365,8 @@ async function elegirRutaAleatoria() {
     const arr = new Uint32Array(1);
     crypto.getRandomValues(arr);
     const idx = arr[0] % rutas.length;
-    showToast(`Ruta asignada: ${rutas[idx].nombre}`);
+    const nombres = rutas.map(r=>r.nombre).join(',');
+    showToast(`idx:${idx} total:${rutas.length} [${nombres}] -> ${rutas[idx].nombre}`);
     return rutas[idx];
   } catch(e) {
     showToast('Error rutas: ' + e.message);
