@@ -290,14 +290,13 @@ async function actualizarHomeGuardia() {
 
 async function elegirRutaAleatoria() {
   try {
-    // Consulta simple sin where para evitar índice
     const snap = await getDocs(collection(db,'rutas'));
-    const rutas = snap.docs
-      .map(d => ({id:d.id,...d.data()}))
-      .filter(r => r.activo === true);
+    const rutas = snap.docs.map(d => ({id:d.id,...d.data()}));
+    showToast(`Rutas encontradas: ${rutas.length}`);
     if (rutas.length === 0) return null;
     return rutas[Math.floor(Math.random() * rutas.length)];
   } catch(e) {
+    showToast('Error: ' + e.message);
     console.log('Error rutas:',e);
     return null;
   }
