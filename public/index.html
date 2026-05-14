@@ -389,10 +389,10 @@ window.iniciarRonda = async () => {
     state.registrosRonda = [];
     const ref = await addDoc(collection(db,'registros'), {
       tipo: 'ronda_inicio',
-      ruta: ruta.nombre,
-      ruta_id: ruta.id,
+      ruta: String(ruta.nombre || ''),
+      ruta_id: String(ruta.id || ''),
       timestamp: Timestamp.now(),
-      puntos_total: state.puntosRuta.length,
+      puntos_total: Number(state.puntosRuta.length),
       puntos_completados: 0
     });
     state.rondaId = ref.id;
@@ -472,11 +472,11 @@ async function registrarPunto(tagId, metodo) {
   try {
     await addDoc(collection(db,'registros'), {
       tipo: 'punto_escaneado',
-      ronda_id: state.rondaId,
-      punto: puntoEsperado,
-      tag_id: tagId,
-      metodo,
-      ruta: state.rutaActual.nombre,
+      ronda_id: String(state.rondaId || ''),
+      punto: String(puntoEsperado || ''),
+      tag_id: String(tagId || ''),
+      metodo: String(metodo || ''),
+      ruta: String(state.rutaActual.nombre || ''),
       timestamp: Timestamp.now()
     });
   } catch(e) { console.log('Error registrar punto:',e); }
