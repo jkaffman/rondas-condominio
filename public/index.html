@@ -384,19 +384,23 @@ window.iniciarRonda = async () => {
       return;
     }
     state.rutaActual = ruta;
-    // Debug: mostrar qué campos tiene la ruta
-    const camposRuta = Object.keys(ruta).join(', ');
-    showToast('Campos: ' + camposRuta);
-    await new Promise(r => setTimeout(r, 2000));
-    
-    // Asegurar que puntos sea un array válido
-    const puntosRaw = ruta.puntos || ruta.Puntos || [];
-    state.puntosRuta = Array.isArray(puntosRaw) ? puntosRaw : Object.values(puntosRaw);
+    // Convertir puntos a array simple siempre
+    const puntosRaw = ruta.puntos;
+    let puntosArray = [];
+    if (puntosRaw) {
+      if (Array.isArray(puntosRaw)) {
+        puntosArray = puntosRaw;
+      } else if (typeof puntosRaw === 'object') {
+        // Firebase a veces devuelve array como objeto {0:'Tag1', 1:'Tag2'...}
+        puntosArray = Object.values(puntosRaw);
+      }
+    }
+    state.puntosRuta = puntosArray.map(p => String(p));
     state.puntoActualIdx = 0;
     state.registrosRonda = [];
     
     if (state.puntosRuta.length === 0) {
-      showToast('Sin puntos. Campos: ' + camposRuta);
+      showToast('Error: puntos vacíos (tipo: ' + typeof puntosRaw + ')');
       btn.disabled = false;
       btn.textContent = 'Iniciar nueva ronda';
       return;
