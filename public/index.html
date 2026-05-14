@@ -391,23 +391,13 @@ window.iniciarRonda = async () => {
       return;
     }
     state.rutaActual = ruta;
-    // Convertir puntos a array simple siempre
-    const puntosRaw = ruta.puntos;
-    let puntosArray = [];
-    if (puntosRaw) {
-      if (Array.isArray(puntosRaw)) {
-        puntosArray = puntosRaw;
-      } else if (typeof puntosRaw === 'object') {
-        // Firebase a veces devuelve array como objeto {0:'Tag1', 1:'Tag2'...}
-        puntosArray = Object.values(puntosRaw);
-      }
-    }
-    state.puntosRuta = puntosArray.map(p => String(p));
+    // puntos ya viene convertido desde elegirRutaAleatoria
+    state.puntosRuta = (ruta.puntos || []).map(p => String(p));
     state.puntoActualIdx = 0;
     state.registrosRonda = [];
-    
+
     if (state.puntosRuta.length === 0) {
-      showToast('Error: puntos vacíos (tipo: ' + typeof puntosRaw + ')');
+      showToast('Error: ruta sin puntos');
       btn.disabled = false;
       btn.textContent = 'Iniciar nueva ronda';
       return;
