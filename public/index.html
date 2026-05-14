@@ -358,12 +358,15 @@ async function elegirRutaAleatoria() {
   try {
     const snap = await getDocs(collection(db,'rutas'));
     const rutas = snap.docs.map(d => ({id:d.id,...d.data()}));
-    showToast(`Rutas encontradas: ${rutas.length}`);
     if (rutas.length === 0) return null;
-    return rutas[Math.floor(Math.random() * rutas.length)];
+    // Fisher-Yates shuffle para aleatoriedad real
+    for (let i = rutas.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rutas[i], rutas[j]] = [rutas[j], rutas[i]];
+    }
+    return rutas[0];
   } catch(e) {
     showToast('Error: ' + e.message);
-    console.log('Error rutas:',e);
     return null;
   }
 }
