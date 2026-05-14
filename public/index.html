@@ -361,7 +361,10 @@ async function elegirRutaAleatoria() {
       .map(d => ({id:d.id,...d.data()}))
       .filter(r => r.nombre && r.puntos);
     if (rutas.length === 0) return null;
-    const idx = Math.floor(Math.random() * rutas.length);
+    const rand = Math.random();
+    const idx = Math.floor(rand * rutas.length);
+    const nombres = rutas.map(r=>r.nombre).join(',');
+    showToast(`rand:${rand.toFixed(2)} idx:${idx} de [${nombres}]`);
     return rutas[idx];
   } catch(e) {
     showToast('Error rutas: ' + e.message);
