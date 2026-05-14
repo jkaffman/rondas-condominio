@@ -384,6 +384,11 @@ window.iniciarRonda = async () => {
       return;
     }
     state.rutaActual = ruta;
+    // Debug: mostrar qué campos tiene la ruta
+    const camposRuta = Object.keys(ruta).join(', ');
+    showToast('Campos: ' + camposRuta);
+    await new Promise(r => setTimeout(r, 2000));
+    
     // Asegurar que puntos sea un array válido
     const puntosRaw = ruta.puntos || ruta.Puntos || [];
     state.puntosRuta = Array.isArray(puntosRaw) ? puntosRaw : Object.values(puntosRaw);
@@ -391,7 +396,7 @@ window.iniciarRonda = async () => {
     state.registrosRonda = [];
     
     if (state.puntosRuta.length === 0) {
-      showToast('Error: la ruta no tiene puntos configurados');
+      showToast('Sin puntos. Campos: ' + camposRuta);
       btn.disabled = false;
       btn.textContent = 'Iniciar nueva ronda';
       return;
