@@ -357,16 +357,14 @@ async function actualizarHomeGuardia() {
 async function elegirRutaAleatoria() {
   try {
     const snap = await getDocs(collection(db,'rutas'));
-    const rutas = snap.docs
-      .map(d => ({id:d.id,...d.data()}))
-      .filter(r => r.nombre);
+    showToast(`Docs en Firestore: ${snap.docs.length}`);
+    await new Promise(r => setTimeout(r, 2500));
+    const rutas = snap.docs.map(d => ({id:d.id,...d.data()}));
     if (rutas.length === 0) return null;
-    // Usar crypto para aleatoriedad real
     const arr = new Uint32Array(1);
     crypto.getRandomValues(arr);
     const idx = arr[0] % rutas.length;
-    const nombres = rutas.map(r=>r.nombre).join(',');
-    showToast(`idx:${idx} total:${rutas.length} [${nombres}] -> ${rutas[idx].nombre}`);
+    showToast(`idx:${idx}/${rutas.length} -> ${rutas[idx].nombre}`);
     return rutas[idx];
   } catch(e) {
     showToast('Error rutas: ' + e.message);
