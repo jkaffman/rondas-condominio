@@ -268,6 +268,24 @@ window.selectRole = (r) => {
   if (r==='admin') setTimeout(() => document.getElementById('pin-input').focus(), 100);
 };
 
+async function inicializarRutas() {
+  try {
+    const snap = await getDocs(collection(db,'rutas'));
+    const nombres = snap.docs.map(d => d.data().nombre);
+    const rutasBase = [
+      { nombre:'RutaA', descripcion:'Recorrido uno', activo:true, puntos:['Tag1','Tag2','Tag3','Tag4','Tag5','Tag6','Tag7'] },
+      { nombre:'RutaB', descripcion:'Recorrido dos', activo:true, puntos:['Tag6','Tag5','Tag4','Tag3','Tag2','Tag1','Tag7'] },
+      { nombre:'RutaC', descripcion:'Recorrido tres', activo:true, puntos:['Tag7','Tag4','Tag3','Tag2','Tag1','Tag6','Tag5'] }
+    ];
+    for (const ruta of rutasBase) {
+      if (!nombres.includes(ruta.nombre)) {
+        await addDoc(collection(db,'rutas'), ruta);
+        console.log('Ruta creada:', ruta.nombre);
+      }
+    }
+  } catch(e) { console.log('Error inicializando rutas:', e); }
+}
+
 window.doLogin = async () => {
   if (state.role === 'admin') {
     const pin = document.getElementById('pin-input').value;
@@ -279,6 +297,7 @@ window.doLogin = async () => {
     }
   }
   await cargarConfig();
+  await inicializarRutas();
   if (state.role === 'guardia') {
     showScreen('guardia-home');
     await actualizarHomeGuardia();
