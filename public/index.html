@@ -384,9 +384,19 @@ window.iniciarRonda = async () => {
       return;
     }
     state.rutaActual = ruta;
-    state.puntosRuta = ruta.puntos || [];
+    // Asegurar que puntos sea un array válido
+    const puntosRaw = ruta.puntos || ruta.Puntos || [];
+    state.puntosRuta = Array.isArray(puntosRaw) ? puntosRaw : Object.values(puntosRaw);
     state.puntoActualIdx = 0;
     state.registrosRonda = [];
+    
+    if (state.puntosRuta.length === 0) {
+      showToast('Error: la ruta no tiene puntos configurados');
+      btn.disabled = false;
+      btn.textContent = 'Iniciar nueva ronda';
+      return;
+    }
+
     const ref = await addDoc(collection(db,'registros'), {
       tipo: 'ronda_inicio',
       ruta: String(ruta.nombre || ''),
@@ -397,7 +407,7 @@ window.iniciarRonda = async () => {
     });
     state.rondaId = ref.id;
     showScreen('guardia-ronda');
-    document.getElementById('ronda-ruta-label').textContent = `Ruta asignada: ${ruta.nombre}`;
+    document.getElementById('ronda-ruta-label').textContent = `Ruta asignada: ${ruta.nombre || 'Sin nombre'}`;
     actualizarVistaRonda();
   } catch(e) {
     console.log('Error iniciar ronda:',e);
