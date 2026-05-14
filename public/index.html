@@ -357,15 +357,21 @@ async function actualizarHomeGuardia() {
 async function elegirRutaAleatoria() {
   try {
     const snap = await getDocs(collection(db,'rutas'));
-    showToast(`Docs en Firestore: ${snap.docs.length}`);
-    await new Promise(r => setTimeout(r, 2500));
-    const rutas = snap.docs.map(d => ({id:d.id,...d.data()}));
-    if (rutas.length === 0) return null;
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    const idx = arr[0] % rutas.length;
-    showToast(`idx:${idx}/${rutas.length} -> ${rutas[idx].nombre}`);
-    return rutas[idx];
+    const arr2 = new Uint32Array(1);
+    crypto.getRandomValues(arr2);
+    const allRutas = snap.docs.map(d => {
+      const data = d.data();
+      // Convertir puntos explícitamente a array JS nativo
+      let puntos = [];
+      if (data.puntos) {
+        puntos = data.puntos.map ? data.puntos.map(p => String(p)) : Object.values(data.puntos).map(p => String(p));
+      }
+      return {id: d.id, nombre: data.nombre, activo: data.activo, descripcion: data.descripcion, puntos};
+    });
+    if (allRutas.length === 0) return null;
+    const idx = arr2[0] % allRutas.length;
+    showToast(`Ruta: ${allRutas[idx].nombre} (${allRutas[idx].puntos.length} puntos)`);
+    return allRutas[idx];
   } catch(e) {
     showToast('Error rutas: ' + e.message);
     return null;
