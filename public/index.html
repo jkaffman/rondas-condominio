@@ -17,8 +17,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 header{background:var(--primary);color:white;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 header h1{font-size:1.1rem;font-weight:600}
 .btn-icon{background:none;border:none;color:white;cursor:pointer;padding:4px;font-size:1.3rem}
-.content{flex:1;padding:1.25rem;overflow-y:auto}
-.card{background:var(--card);border-radius:12px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid var(--border)}
+.content{flex:1;padding:.75rem;overflow-y:auto}
+.card{background:var(--card);border-radius:12px;padding:1rem;margin-bottom:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid var(--border)}
 .card-title{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.75rem}
 .btn{width:100%;padding:.875rem;border-radius:10px;border:none;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s}
 .btn-primary{background:var(--primary);color:white}
@@ -168,7 +168,8 @@ header h1{font-size:1.1rem;font-weight:600}
 <div id="guardia-ronda" class="screen">
   <header>
     <div><div style="font-size:.75rem;opacity:.8" id="ronda-ruta-label">—</div><h1>Ronda en curso</h1></div>
-    <button class="btn-icon" onclick="cancelarRonda()">✕</button>
+    <button class="btn-icon" onclick="suspenderRonda()" title="Suspender" style="font-size:1rem;margin-right:4px">⏸</button>
+    <button class="btn-icon" onclick="cancelarRonda()" title="Cancelar">✕</button>
   </header>
   <div class="content">
     <div class="card">
@@ -484,13 +485,15 @@ async function registrarPunto(tagId, metodo) {
 
 async function finalizarRonda() {
   try {
+    const manuales = state.registrosRonda.filter(r => r.metodo === 'manual').length;
     await setDoc(doc(db,'registros',state.rondaId), {
       tipo: 'ronda_completa',
       ruta: state.rutaActual.nombre,
       ruta_id: state.rutaActual.id,
       timestamp: Timestamp.now(),
       puntos_total: state.puntosRuta.length,
-      puntos_completados: state.puntosRuta.length
+      puntos_completados: state.puntosRuta.length,
+      manuales
     });
     showToast('🎉 Ronda completada');
     showScreen('guardia-home');
@@ -499,10 +502,60 @@ async function finalizarRonda() {
 }
 
 window.cancelarRonda = () => {
-  if (confirm('¿Cancelar la ronda en curso?')) {
+  if (confirm('¿Cancelar la ronda? Se perderá el progreso actual.')) {
+    if (instState.nfcController) try { instState.nfcController.abort(); } catch(e){}
     showScreen('guardia-home');
     actualizarHomeGuardia();
   }
+};
+
+window.suspenderRonda = () => {
+  if (confirm('¿Suspender la ronda? El progreso se guardará y podrás continuarla después.')) {
+    const hechos = state.puntoActualIdx;
+    const total = state.puntosRuta.length;
+    // Guardar estado suspendido en localStorage
+    const suspendido = {
+      rondaId: state.rondaId,
+      rutaActual: state.rutaActual,
+      puntosRuta: state.puntosRuta,
+      puntoActualIdx: state.puntoActualIdx,
+      registrosRonda: state.registrosRonda,
+      timestamp: new Date().toISOString()
+    };
+    try { localStorage.setItem('ronda_suspendida', JSON.stringify(suspendido)); } catch(e){}
+    showToast(`Ronda suspendida — ${hechos}/${total} puntos guardados`);
+    showScreen('guardia-home');
+    actualizarHomeGuardia();
+    // Mostrar banner de ronda suspendida
+    setTimeout(() => {
+      document.getElementById('alerta-banner').innerHTML = `
+        <div class="alert-banner" style="background:#fef9c3;border-color:#fde047">
+          <span class="alert-icon">⏸</span>
+          <div class="alert-text">
+            <div class="alert-title" style="color:#a16207">Ronda suspendida</div>
+            <div>${hechos} de ${total} puntos completados · 
+            <span style="color:var(--primary);cursor:pointer;font-weight:600" onclick="reanudarRonda()">Reanudar</span></div>
+          </div>
+        </div>`;
+    }, 300);
+  }
+};
+
+window.reanudarRonda = () => {
+  try {
+    const datos = JSON.parse(localStorage.getItem('ronda_suspendida') || 'null');
+    if (!datos) { showToast('No hay ronda suspendida'); return; }
+    state.rondaId = datos.rondaId;
+    state.rutaActual = datos.rutaActual;
+    state.puntosRuta = datos.puntosRuta;
+    state.puntoActualIdx = datos.puntoActualIdx;
+    state.registrosRonda = datos.registrosRonda;
+    localStorage.removeItem('ronda_suspendida');
+    showScreen('guardia-ronda');
+    document.getElementById('ronda-ruta-label').textContent = `Ruta: ${state.rutaActual.nombre} (reanudada)`;
+    actualizarVistaRonda();
+    showToast(`Ronda reanudada — continúa en punto ${state.puntoActualIdx + 1}`);
+  } catch(e) { showToast('Error al reanudar'); }
 };
 
 window.registrarManual = () => {
@@ -551,8 +604,13 @@ async function renderPanel(el) {
     const rondasHoy = await getRondas(true);
     const frecH = state.config.frecuencia_horas || 2;
     const ahora = new Date();
-    const horasTranscurridas = ahora.getHours() + ahora.getMinutes()/60;
-    const esperadas = Math.max(1, Math.floor(horasTranscurridas/frecH));
+    // Contar pendientes desde primera ronda del día
+    let esperadas = 0;
+    if (rondasHoy.length > 0) {
+      const primera = rondasHoy[rondasHoy.length-1].timestamp.toDate();
+      const horasDesde = (ahora - primera) / 3600000;
+      esperadas = Math.floor(horasDesde / frecH);
+    }
     const ultima = rondasHoy[0];
     const ultimaFecha = ultima?.timestamp?.toDate();
     const proxima = ultimaFecha ? new Date(ultimaFecha.getTime()+frecH*3600000) : null;
@@ -577,7 +635,8 @@ async function renderPanel(el) {
           rondasHoy.slice(0,3).map(r=>`
             <div class="history-item" style="padding:.4rem 0">
               <div class="history-header"><span class="history-ruta">${r.ruta||'—'}</span><span class="badge badge-success">Completa</span></div>
-              <div class="history-time">${formatDT(r.timestamp.toDate())} · ${r.puntos_completados||0}/${r.puntos_total||0} pts</div>
+              <div class="history-time">${formatDT(r.timestamp.toDate())} · ${r.puntos_completados||0}/${r.puntos_total||0} pts${r.manuales>0?` · <span style="color:var(--warning)">⚠️ ${r.manuales} manual</span>`:''}
+              </div>
             </div>`).join('')}
       </div>
       <button class="btn btn-outline" onclick="adminTab('panel')">🔄 Actualizar</button>`;
