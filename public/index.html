@@ -357,16 +357,14 @@ async function actualizarHomeGuardia() {
 async function elegirRutaAleatoria() {
   try {
     const snap = await getDocs(collection(db,'rutas'));
-    const rutas = snap.docs.map(d => ({id:d.id,...d.data()}));
+    const rutas = snap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(r => r.nombre && r.puntos);
     if (rutas.length === 0) return null;
-    // Fisher-Yates shuffle para aleatoriedad real
-    for (let i = rutas.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [rutas[i], rutas[j]] = [rutas[j], rutas[i]];
-    }
-    return rutas[0];
+    const idx = Math.floor(Math.random() * rutas.length);
+    return rutas[idx];
   } catch(e) {
-    showToast('Error: ' + e.message);
+    showToast('Error rutas: ' + e.message);
     return null;
   }
 }
