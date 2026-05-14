@@ -359,7 +359,7 @@ async function elegirRutaAleatoria() {
     const snap = await getDocs(collection(db,'rutas'));
     const rutas = snap.docs
       .map(d => ({id:d.id,...d.data()}))
-      .filter(r => r.nombre && r.puntos);
+      .filter(r => r.nombre);
     if (rutas.length === 0) return null;
     // Usar crypto para aleatoriedad real
     const arr = new Uint32Array(1);
