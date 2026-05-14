@@ -389,7 +389,6 @@ async function elegirRutaAleatoria() {
     });
     if (allRutas.length === 0) return null;
     const idx = arr2[0] % allRutas.length;
-    showToast(`Ruta: ${allRutas[idx].nombre} (${allRutas[idx].puntos.length} puntos)`);
     return allRutas[idx];
   } catch(e) {
     showToast('Error rutas: ' + e.message);
@@ -541,7 +540,11 @@ async function finalizarRonda() {
 
 window.cancelarRonda = () => {
   if (confirm('¿Cancelar la ronda? Se perderá el progreso actual.')) {
-    if (instState.nfcController) try { instState.nfcController.abort(); } catch(e){}
+    state.rutaActual = null;
+    state.puntosRuta = [];
+    state.puntoActualIdx = 0;
+    state.rondaId = null;
+    state.registrosRonda = [];
     showScreen('guardia-home');
     actualizarHomeGuardia();
   }
