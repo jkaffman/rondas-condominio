@@ -401,7 +401,7 @@ window.iniciarRonda = async () => {
     actualizarVistaRonda();
   } catch(e) {
     console.log('Error iniciar ronda:',e);
-    showToast('Error al iniciar. Intenta de nuevo.');
+    showToast('Error: ' + (e.code || e.message || 'desconocido'));
   }
   btn.disabled = false;
   btn.textContent = 'Iniciar nueva ronda';
