@@ -136,20 +136,22 @@ header h1{font-size:1.1rem;font-weight:600}
 <div id="instalacion-screen" class="screen">
   <header>
     <div><div style="font-size:.75rem;opacity:.8">Modo instalación</div><h1>Registrar Tags NFC</h1></div>
-    <button class="btn-icon" onclick="showScreen('admin-screen');adminTab('config')">✕</button>
+    <button class="btn-icon" onclick="salirInstalacion()">✕</button>
   </header>
   <div class="content">
     <div class="card" style="border:2px solid var(--warning)">
       <div class="card-title">⚙️ Instrucciones</div>
-      <p style="font-size:.875rem;color:var(--muted);line-height:1.6">Acerca cada tag NFC al celular en orden. La app leerá su ID y lo guardará en Firebase automáticamente.</p>
+      <p style="font-size:.875rem;color:var(--muted);line-height:1.6">1. Acerca el tag indicado al celular<br>2. Cuando aparezca el ID detectado toca <strong>Confirmar</strong><br>3. Repite con cada tag en orden</p>
     </div>
     <div class="card">
       <div class="card-title">Punto actual</div>
       <div class="nfc-area">
-        <div class="nfc-ring scanning" id="inst-nfc-ring"><span class="nfc-icon" id="inst-nfc-icon">📡</span></div>
-        <div class="nfc-text" id="inst-instruccion">Acerca el tag al celular</div>
-        <div style="font-size:1.1rem;font-weight:600;margin-top:.5rem" id="inst-punto-nombre">—</div>
+        <div class="nfc-ring" id="inst-nfc-ring"><span class="nfc-icon" id="inst-nfc-icon">📡</span></div>
+        <div class="nfc-text" id="inst-instruccion">Esperando tag...</div>
+        <div style="font-size:1.1rem;font-weight:700;margin-top:.5rem;color:var(--primary)" id="inst-punto-nombre">—</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.4rem;font-family:monospace" id="inst-tag-leido"></div>
       </div>
+      <button class="btn btn-success" id="btn-inst-confirmar" onclick="confirmarTag()" disabled style="margin-top:.5rem">✓ Confirmar este tag</button>
     </div>
     <div class="card">
       <div class="card-title">Progreso</div>
@@ -218,6 +220,25 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+function beepExito() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const tiempos = [[0, 440, 0.15], [0.18, 660, 0.15], [0.36, 880, 0.2]];
+    tiempos.forEach(([when, freq, dur]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + when);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + when + dur);
+      osc.start(ctx.currentTime + when);
+      osc.stop(ctx.currentTime + when + dur + 0.05);
+    });
+  } catch(e) { console.log('Audio:', e); }
+}
 
 let state = {
   role: 'guardia',
@@ -436,6 +457,7 @@ async function registrarPunto(tagId, metodo) {
       timestamp: Timestamp.now()
     });
   } catch(e) { console.log('Error registrar punto:',e); }
+  beepExito();
   showToast(`✓ ${puntoEsperado} registrado`);
   state.puntoActualIdx++;
   setTimeout(actualizarVistaRonda, 800);
@@ -593,6 +615,12 @@ async function renderConfig(el) {
 // MODO INSTALACIÓN
 let instState = { puntos: [], idx: 0, nfcController: null };
 
+window.salirInstalacion = () => {
+  if (instState.nfcController) try { instState.nfcController.abort(); } catch(e){}
+  showScreen('admin-screen');
+  adminTab('config');
+};
+
 window.iniciarInstalacion = async () => {
   try {
     const snap = await getDocs(collection(db,'puntos'));
@@ -600,6 +628,7 @@ window.iniciarInstalacion = async () => {
       .map(d => ({id:d.id,...d.data()}))
       .sort((a,b) => a.nombre.localeCompare(b.nombre));
     instState.idx = 0;
+    instState.tagPendiente = null;
     showScreen('instalacion-screen');
     actualizarVistaInstalacion();
     iniciarNFCInstalacion();
@@ -609,6 +638,9 @@ window.iniciarInstalacion = async () => {
 function actualizarVistaInstalacion() {
   const total = instState.puntos.length;
   const idx = instState.idx;
+  instState.tagPendiente = null;
+  document.getElementById('btn-inst-confirmar').disabled = true;
+  document.getElementById('inst-tag-leido').textContent = '';
   if (idx >= total) {
     document.getElementById('inst-instruccion').textContent = '¡Todos los tags registrados!';
     document.getElementById('inst-punto-nombre').textContent = '';
@@ -626,11 +658,26 @@ function actualizarVistaInstalacion() {
   const lista = document.getElementById('inst-lista');
   lista.innerHTML = instState.puntos.map((p,i) => {
     let cls = 'pending', icon = i+1, extra = '';
-    if (i < idx) { cls='done'; icon='✓'; extra=`<span class="point-time">${p.nfc_id||''}</span>`; }
+    if (i < idx) { cls='done'; icon='✓'; extra=`<span class="point-time" style="font-family:monospace;font-size:10px">${p.nfc_id||''}</span>`; }
     else if (i===idx) cls='current';
     return `<div class="point-item"><div class="point-num ${cls}">${icon}</div><span class="point-name">${p.nombre}</span>${extra}</div>`;
   }).join('');
 }
+
+window.confirmarTag = async () => {
+  if (!instState.tagPendiente) return;
+  const punto = instState.puntos[instState.idx];
+  const tagId = instState.tagPendiente;
+  document.getElementById('btn-inst-confirmar').disabled = true;
+  try {
+    await setDoc(doc(db,'puntos',punto.id), {...punto, nfc_id: tagId});
+    instState.puntos[instState.idx].nfc_id = tagId;
+    beepExito();
+    showToast(`✓ ${punto.nombre} guardado`);
+    instState.idx++;
+    actualizarVistaInstalacion();
+  } catch(e) { showToast('Error: '+e.message); }
+};
 
 function iniciarNFCInstalacion() {
   if (!('NDEFReader' in window)) {
@@ -641,18 +688,16 @@ function iniciarNFCInstalacion() {
   instState.nfcController = controller;
   const reader = new NDEFReader();
   reader.scan({signal: controller.signal}).then(() => {
-    reader.onreading = async (event) => {
+    reader.onreading = (event) => {
       if (!document.getElementById('instalacion-screen').classList.contains('active')) return;
       if (instState.idx >= instState.puntos.length) return;
       const tagId = event.serialNumber?.replace(/:/g,'').toUpperCase() || 'TAG_'+Date.now();
-      const punto = instState.puntos[instState.idx];
-      try {
-        await setDoc(doc(db,'puntos',punto.id), {...punto, nfc_id: tagId});
-        instState.puntos[instState.idx].nfc_id = tagId;
-        showToast(`✓ ${punto.nombre} = ${tagId}`);
-        instState.idx++;
-        setTimeout(actualizarVistaInstalacion, 800);
-      } catch(e) { showToast('Error guardando: '+e.message); }
+      instState.tagPendiente = tagId;
+      document.getElementById('inst-nfc-ring').className = 'nfc-ring success';
+      document.getElementById('inst-nfc-icon').textContent = '✅';
+      document.getElementById('inst-instruccion').textContent = 'Tag detectado — confirma para guardar';
+      document.getElementById('inst-tag-leido').textContent = 'ID: ' + tagId;
+      document.getElementById('btn-inst-confirmar').disabled = false;
     };
   }).catch(e => showToast('Error NFC: '+e.message));
 }
